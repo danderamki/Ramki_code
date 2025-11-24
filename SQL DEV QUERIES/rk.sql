@@ -18,6 +18,8 @@ FROM
     salaryrank
 WHERE
     rank IN ( 3, 4 );
+
+      SELECT * FROM TABLE(DBMS_XPLAN.DISPLAY);
     
     
     
