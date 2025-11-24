@@ -430,7 +430,10 @@ END;
 
 
 --COLLECTIONS
-
+/*
+In Oracle PL/SQL, collections are composite data types that allow you to store multiple elements of the same type within a single variable.
+They are analogous to arrays or lists in other programming languages. Oracle provides three main types of collections:
+*/
 
 --Index-By Tables (Associative Arrays)
 /*
