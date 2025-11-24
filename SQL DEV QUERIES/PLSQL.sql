@@ -306,14 +306,17 @@ END;
 
 
 -- Check the current data in the audit table, should be no rows.
-COLUMN description FORMAT A10
+
+SELECT * FROM ITEMS;
+
 SELECT * FROM items_audit_log;
 
 
 -- Update the price of an item.
 UPDATE items
-SET    price = 499.99
+SET    price = 500
 WHERE  id    = 1;
+commit;
 
 
 -- Check the audit table again.
@@ -400,6 +403,15 @@ END;
 
 
 --- PRAGMA EXCEPTION_INIT
+/*
+In Oracle PL/SQL, PRAGMA EXCEPTION_INIT is a compiler directive that associates a user-defined exception name with a specific Oracle error number. This allows you to create specific exception handlers for named exceptions rather than relying on the generic WHEN OTHERS block. 
+This improves code readability and maintainability by making the code's intent clearer to anyone who reads it. 
+How it works
+To use PRAGMA EXCEPTION_INIT, you must follow two steps within the declarative section of a PL/SQL block, subprogram, or package: 
+Declare a user-defined exception.
+Immediately follow the exception declaration with the PRAGMA EXCEPTION_INIT directive, associating the new exception with an Oracle error number. 
+*/
+
 SET SERVEROUTPUT ON
 DECLARE
   l_user_id   all_users.username%TYPE := 0;
