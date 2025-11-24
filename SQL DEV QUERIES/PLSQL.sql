@@ -642,7 +642,8 @@ END;
 ---FORALL
 
 /*
-The FORALL syntax allows us to bind the contents of a collection to a single DML statement, allowing the DML to be run for each row in the collection without requiring a context switch each time. 
+The FORALL syntax allows us to bind the contents of a collection to a single DML statement, 
+allowing the DML to be run for each row in the collection without requiring a context switch each time. 
 To test bulk binds using records we first create a test table.
 */
 
