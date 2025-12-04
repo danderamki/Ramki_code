@@ -252,8 +252,13 @@ WHERE e.Salary > m.Salary;
 ---Write a query to fetch alternating rows from a table.
 
 SELECT *
-FROM (SELECT rownum, ENAME, EMPNO FROM EMP A) -- Replace Employee with your table name and ID, Name with desired columns
-WHERE MOD(rownum, 2) = 0; -- Filter for rows where the remainder of division by 2 is 0
+FROM (
+  SELECT t.*, ROW_NUMBER() OVER (ORDER BY employee_id) AS rn
+  FROM employees t
+)
+WHERE MOD(rn, 2) = 1;  -- 0 for  even 1 for odd
+
+
 
 ---Write a query to find departments with the highest average salary.
 
@@ -292,7 +297,7 @@ WITH OrderedEmployees AS (
 )
 SELECT *
 FROM OrderedEmployees
-WHERE OrderedRowNum = 1;
+WHERE OrderedRowNum = 5;
 
 
 SELECT * FROM  EMP ;
@@ -484,7 +489,13 @@ END;
 ---TABLE PARTITIONING
 /*
 Table partition :
-There are so many aspects which are important in improving the performance of SQL. Partition allows tables, indexes and index organized tables to be subdivided into smaller pieces. Table partition is used to reduce the cost and improving performance of the application. There are some partition mechanisms using which one can divide a table into smaller pieces. Partitions can be used in so many application where we need to improve the performance. Each partition has its own name and it has own memory storage. partition allows table,index or index organized tables to be subdivided in to smaller pieces and each piece of table,index or index organized table is called as Partition
+There are so many aspects which are important in improving the performance of SQL. 
+Partition allows tables, indexes and index organized tables to be subdivided into smaller pieces. 
+Table partition is used to reduce the cost and improving performance of the application. 
+There are some partition mechanisms using which one can divide a table into smaller pieces. 
+Partitions can be used in so many application where we need to improve the performance. 
+Each partition has its own name and it has own memory storage. partition allows table,index or index organized tables to be subdivided in to smaller pieces and each piece of table,index or index organized table is called as Partition
+
 What is mean by Table Partition :
 Following are Advantages of Partition:
 1.Increase Performance
@@ -494,9 +505,12 @@ Following are Advantages of Partition:
 “We can not partition a table with Long and long raw datatype…”
 When to partition the table?
 1.Table should be greater than 2 GB
-2.Tables which contains historical data in which new data will be added in to newest partition. The real life example of this is historical table which contains updatable data for one year other data is read only.
+2.Tables which contains historical data in which new data will be added in to newest partition. 
+The real life example of this is historical table which contains updatable data for one year other data is read only.
 3.When contents of the table needs to be distributed in different storage devices.
-4.When table performance is weak and we need to improve performance of application. Each row in partitioned table is unambiguously assigned to single partition table. The Partitioning key is comprised of one or more columns that determine the partition where each row will be stored.
+4.When table performance is weak and we need to improve performance of application. 
+Each row in partitioned table is unambiguously assigned to single partition table. 
+The Partitioning key is comprised of one or more columns that determine the partition where each row will be stored.
 Types Of Table partitioning
 There are following types of Table partition:
 1.Range Partition

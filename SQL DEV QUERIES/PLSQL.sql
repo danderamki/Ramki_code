@@ -404,7 +404,8 @@ END;
 
 --- PRAGMA EXCEPTION_INIT
 /*
-In Oracle PL/SQL, PRAGMA EXCEPTION_INIT is a compiler directive that associates a user-defined exception name with a specific Oracle error number. This allows you to create specific exception handlers for named exceptions rather than relying on the generic WHEN OTHERS block. 
+In Oracle PL/SQL, PRAGMA EXCEPTION_INIT is a compiler directive that associates a user-defined exception name with a specific Oracle error number. 
+This allows you to create specific exception handlers for named exceptions rather than relying on the generic WHEN OTHERS block. 
 This improves code readability and maintainability by making the code's intent clearer to anyone who reads it. 
 How it works
 To use PRAGMA EXCEPTION_INIT, you must follow two steps within the declarative section of a PL/SQL block, subprogram, or package: 

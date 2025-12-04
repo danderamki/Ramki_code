@@ -96,6 +96,7 @@ AND e.hire_date >= DATE '2022-01-01';
 --6. Partition Large Tables
 --Apply RANGE/LIST/HASH (or composite) partitioning to limit I/O to relevant partitions for large tables or time‑series data.
 --Create a range‑partitioned table by date:
+
 CREATE TABLE orders (    order_id NUMBER,    customer_id NUMBER,    order_date DATE,    total NUMBER  )
 PARTITION BY RANGE (order_date) (    PARTITION p2023 VALUES LESS THAN (DATE '2024-01-01'), 
 PARTITION p2024 VALUES LESS THAN (DATE '2025-01-01'),   
@@ -171,6 +172,16 @@ BEGIN    c := DBMS_SPM.LOAD_PLANS_FROM_CURSOR_CACHE(       schema_name => 'HR', 
 END;
 
 ---One‑line: Hints can fix paths but should be last resort; prefer statistics and plan management.
+
+"My tuning approach starts with analyzing the execution plan using  and . I check for costly operations like full table scans and optimize them with proper indexing. 
+For high‑cardinality columns, I use B‑tree indexes, and for low‑cardinality columns, bitmap indexes.
+I also make sure statistics are up to date using , including histograms for skewed data distributions, so the optimizer can make the best decisions."
+"I always use bind variables to reduce hard parsing and improve shared pool efficiency. 
+For large tables, I apply partitioning so queries only scan relevant partitions. 
+In PL/SQL, I avoid row‑by‑row processing by using bulk operations —  for fetching and  for batch DML — which minimizes context switches between SQL and PL/SQL engines."
+"For deeper analysis, I rely on SQL Trace and TKPROF to identify bottlenecks, and I use AWR reports or Enterprise Manager for system‑wide monitoring. 
+Optimizer hints are my last resort when I need to influence execution plans directly. 
+Overall, my philosophy is to write efficient SQL first, then use PL/SQL features like bulk operations and collections to handle large volumes of data effectively.
 
 
 ---One‑line structure to deliver:
