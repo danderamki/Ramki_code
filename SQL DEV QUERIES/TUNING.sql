@@ -2,6 +2,7 @@
 
 --1. Analyze Execution Plans
 
+
 --Example: generate a plan and display it with actual statistics.
 
 --SQL:
@@ -57,8 +58,14 @@ END;
 ---4. Keep Statistics Current
 
 ---Gather table stats (recommended options):
+/*
+"The DBMS_STATS.GATHER_TABLE_STATS procedure collects statistics about a table and its indexes so the cost-based optimizer can make efficient decisions.
+It’s essential for performance tuning, especially after large data changes.
+Parameters like estimate_percent, method_opt, and cascade control sampling, histograms, and index stats."
+*/
+
 BEGIN  
-DBMS_STATS.GATHER_TABLE_STATS( ownname => 'HR', tabname => 'EMPLOYEES', estimate_percent => DBMS_STATS.AUTO_SAMPLE_SIZE, cascade => TRUE); 
+DBMS_STATS.GATHER_TABLE_STATS( ownname => 'MYREYA', tabname => 'EMPLOYEES', estimate_percent => DBMS_STATS.AUTO_SAMPLE_SIZE, cascade => TRUE); 
 END;
 
 ---Create histogram (for skewed column):

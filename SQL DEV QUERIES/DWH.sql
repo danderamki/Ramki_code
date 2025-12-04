@@ -2,7 +2,8 @@
 # 🏆 Data Warehouse Interview Q&A
 
 ### 1. **What is a Data Warehouse?**
-- **Answer**: A data warehouse is a centralized repository that integrates data from multiple sources, optimized for querying and analysis rather than transaction processing. It supports business intelligence, reporting, and decision‑making.
+- **Answer**: A data warehouse is a centralized repository that integrates data from multiple sources, optimized for querying and analysis rather than transaction processing.
+It supports business intelligence, reporting, and decision‑making.
 
 ---
 
@@ -65,8 +66,10 @@
 
 ## 🎯 Interview Delivery Tip
 When asked about data warehouses, frame it like this:  
-*"I’ve worked extensively with Oracle data warehouses, designing fact/dimension tables, optimizing queries with partitioning and indexes, and building ETL pipelines using Informatica and PL/SQL. More recently, I’ve leveraged Snowflake and AWS for scalable, cloud‑native analytics, applying ELT patterns and automation. This gives me a strong foundation across both traditional and modern warehouse architectures."*
+*"I’ve worked extensively with Oracle data warehouses, designing fact/dimension tables, optimizing queries with partitioning and indexes,
+and building ETL pipelines using Informatica and PL/SQL. 
+More recently, I’ve leveraged Snowflake and AWS for scalable, cloud‑native analytics, applying ELT patterns and automation.
+This gives me a strong foundation across both traditional and modern warehouse architectures."*
 
 ---
 
-👉 Ram, would you like me to also prepare a **“Top 5 Data Warehouse Project Stories”** you can use in interviews — short narratives that show how you solved real problems with Oracle, ETL, and Snowflake? That way you’ll have ready‑made examples to impress.

@@ -576,3 +576,85 @@ PARTITION BY HASH (invoice_no)
 select  TABLE_NAME , PARTITIONING_TYPE  from    
          user_part_tables
    where  TABLE_NAME ='invoices';
+   
+   
+   
+   1. ROWID vs ROWNUM
+• 	ROWID: Permanent physical address of a row in the database. Fastest way to access a row.
+• 	ROWNUM: Temporary sequential number assigned to rows in a query result. Used for limiting rows.
+👉 Together: Used for deduplication and top‑N queries.
+
+2. Indexes in Oracle
+• 	Definition: Structures that improve query performance by providing fast access paths.
+• 	Types:
+• 	B‑Tree Index (default, balanced tree structure).
+• 	Bitmap Index (efficient for low‑cardinality columns).
+• 	Function‑based Index (on expressions).
+• 	Interview Tip: Mention how you used indexes + partitioning to optimize billion‑row fact tables.
+
+3. Partitioning
+• 	Definition: Splitting large tables into smaller, manageable segments.
+• 	Types: Range, List, Hash, Composite.
+• 	Benefits: Faster queries, easier maintenance, parallel processing.
+👉 Example: Partitioning sales data by month for faster reporting.
+
+4. Materialized Views
+• 	Definition: Pre‑computed query results stored physically.
+• 	Use Cases: Aggregations, joins, summaries for BI reporting.
+• 	Refresh Modes:
+• 	ON COMMIT (immediate refresh).
+• 	ON DEMAND (manual refresh).
+• 	Interview Tip: Highlight how you used materialized views to speed up reporting dashboards.
+
+5. Analytic Functions
+• 	Definition: Functions that perform calculations across sets of rows, returning results for each row.
+• 	Examples:
+• 	, ,  → ranking.
+• 	,  → access previous/next row values.
+• 	 → running totals.
+• 	Interview Tip: Show how you used analytic functions for financial reporting (e.g., Actual vs Budget comparisons).
+
+
+
+
+---Oracle query execution flow
+
+Logically, SQL clauses execute in the order FROM → WHERE → GROUP BY → HAVING → SELECT → ORDER BY."
+
++-------------------+
+|   User submits    |
+|   SQL statement   |
++-------------------+
+          |
+          v
++-------------------+
+|   Parsing Stage   |
+| - Syntax check    |
+| - Semantic check  |
+| - Shared pool     |
++-------------------+
+          |
+          v
++-------------------+
+| Optimization      |
+| - Cost-based      |
+|   optimizer (CBO) |
+| - Choose best plan|
++-------------------+
+          |
+          v
++-------------------+
+| Row Source Gen    |
+| - Translate plan  |
+|   into row sources|
+| - Build execution |
+|   pipeline        |
++-------------------+
+          |
+          v
++-------------------+
+|   Execution       |
+| - Fetch/modify    |
+|   rows            |
+| - Return results  |
++-------------------+
