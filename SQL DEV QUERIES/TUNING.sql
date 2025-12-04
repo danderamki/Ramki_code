@@ -1,105 +1,181 @@
----Explain Plan
+---Top 10 Oracle SQL & PL/SQL tuning tips, with a short one‑line explanation per example.
 
-EXPLAIN PLAN FOR
-WITH salaryrank AS (
-    SELECT
-        sal,
-        DENSE_RANK()
-        OVER(
-            ORDER BY
-                sal DESC
-        ) AS rank
-    FROM
-        emp
-)
-SELECT
-    sal
-FROM
-    salaryrank
-WHERE
-    rank IN ( 3, 4 );
+--1. Analyze Execution Plans
 
- SELECT * FROM TABLE(DBMS_XPLAN.DISPLAY);
-      
-      
-      
----HINTS
+--Example: generate a plan and display it with actual statistics.
 
-/* A query without a hint. It performs a range scan*/
-SELECT employee_id, last_name
-  FROM employees e 
-  WHERE last_name LIKE 'A%';
- 
-/* Using a hint to command the optimizer to use FULL TABLE SCAN*/  
-SELECT /*+ FULL(e) */ employee_id, last_name
-  FROM employees e 
-  WHERE last_name LIKE 'A%';
- 
-/* Using the hint with the table name as the parameter*/
-SELECT /*+ FULL(employees) */ employee_id, last_name
-  FROM employees 
-  WHERE last_name LIKE 'A%';
- 
-/* Using the hint with the table name while we aliased it*/  
-SELECT /*+ FULL(employees) */ employee_id, last_name
-  FROM employees e 
-  WHERE last_name LIKE 'A%';
- 
-/* Using an unreasonable hint. The optimizer will not consider this hint */
-SELECT /*+ INDEX(EMP_DEPARTMENT_IX) */ employee_id, last_name
-  FROM employees e 
-  WHERE last_name LIKE 'A%';
-  
-/* Using multiple hints. But they aim for the same area. So unreasonable. 
-   Optimizer picked full table scan as the best choice */
-SELECT /*+ INDEX(EMP_NAME_IX) FULL(e)  */ employee_id, last_name
-  FROM employees e 
-  WHERE last_name LIKE 'A%';
- 
-/* When we change the order of the hints. But it did not change the Optimizer's decision*/
-SELECT /*+ FULL(e) INDEX(EMP_NAME_IX)   */ employee_id, last_name
-  FROM employees e 
-  WHERE last_name LIKE 'A%';
- 
-/* There is no hint. To see the execution plan to compare with the next one */  
-SELECT  
-  e.department_id, d.department_name, 
-  MAX(salary), AVG(salary)
-FROM employees e, departments d
-WHERE e.department_id=e.department_id
-GROUP BY e.department_id, d.department_name;
- 
-/* Using multiple hints to change the execution plan */
-SELECT /*+ LEADING(e d)  INDEX(d DEPT_ID_PK) INDEX(e EMP_DEPARTMENT_IX)*/ 
-  e.department_id, d.department_name, 
-  MAX(salary), AVG(salary)
-FROM employees e, departments d
-WHERE e.department_id=e.department_id
-GROUP BY e.department_id, d.department_name;
- 
-/* Using hints when there are two access paths.*/  
-SELECT /*+ INDEX(EMP_DEPARTMENT_IX) */ employee_id, last_name
-  FROM employees e 
-  WHERE last_name LIKE 'A%'
-  and department_id > 120;
- 
-/* When we change the selectivity of last_name search, it did not consider our hint.*/
-SELECT /*+ INDEX(EMP_DEPARTMENT_IX) */ employee_id, last_name
-  FROM employees e 
-  WHERE last_name LIKE 'Al%'
-  and department_id > 120;
- 
-/* Another example with multiple joins, groups etc. But with no hint*/
-SELECT customers.cust_first_name, customers.cust_last_name, 
-  MAX(QUANTITY_SOLD), AVG(QUANTITY_SOLD)
-FROM sales, customers
-WHERE sales.cust_id=customers.cust_id
-GROUP BY customers.cust_first_name, customers.cust_last_name;
- 
-/* Performance increase when performing parallel execution hint*/
-SELECT /*+ PARALLEL(4) */ customers.cust_first_name, customers.cust_last_name, 
-  MAX(QUANTITY_SOLD), AVG(QUANTITY_SOLD)
-FROM sales, customers
-WHERE sales.cust_id=customers.cust_id
-GROUP BY customers.cust_first_name, customers.cust_last_name;
+--SQL:
 
+EXPLAIN PLAN FOR  SELECT e.emp_id, e.salary  FROM employees e  WHERE e.department_id = 10;
+
+--Display:
+
+SELECT * FROM TABLE(DBMS_XPLAN.DISPLAY());
+
+--Or show actual execution plan for a cursor:
+
+SELECT * FROM TABLE(DBMS_XPLAN.DISPLAY_CURSOR(NULL, NULL, 'ALLSTATS LAST'));
+
+--One‑line: Use DBMS_XPLAN to find expensive operators (full scans, sorts, nested loops).
+
+----2. Leverage Indexes Wisely
+
+---B‑tree index (high cardinality):
+CREATE INDEX emp_empid_idx ON employees(emp_id);
+---Composite index (multiple predicates):
+CREATE INDEX emp_dept_hiredate_idx ON employees(department_id, hire_date);
+---Function‑based index (preserve index usage when using functions):
+CREATE INDEX emp_name_upper_idx ON employees(UPPER(last_name));
+
+--Query that can use it:
+SELECT * FROM employees WHERE UPPER(last_name) = 'SMITH';
+---Bitmap index (low cardinality, read‑heavy DW):
+CREATE BITMAP INDEX emp_status_bmidx ON employees(status);
+
+---One‑line: Pick index type by cardinality and query patterns; use function‑based indexes instead of wrapping columns.
+
+---3. Use Bind Variables
+
+--Simple parameterized query (client/OCI/SQL*Plus):
+
+VARIABLE b_emp_id NUMBER  
+EXEC :b_emp_id := 101;  
+SELECT * FROM employees WHERE emp_id = :b_emp_id;
+
+--PL/SQL using EXECUTE IMMEDIATE with bind:
+
+DECLARE   
+v_dept NUMBER := 10;  
+v_count NUMBER;  
+BEGIN   
+EXECUTE IMMEDIATE 'SELECT COUNT(*) FROM employees WHERE manager_id = :1'  INTO v_count USING v_dept;   
+DBMS_OUTPUT.PUT_LINE('Count=' || v_count);
+END;
+
+---One‑line: Bind variables reduce hard parsing and improve shared SQL cache reuse.
+
+---4. Keep Statistics Current
+
+---Gather table stats (recommended options):
+BEGIN  
+DBMS_STATS.GATHER_TABLE_STATS( ownname => 'HR', tabname => 'EMPLOYEES', estimate_percent => DBMS_STATS.AUTO_SAMPLE_SIZE, cascade => TRUE); 
+END;
+
+---Create histogram (for skewed column):
+BEGIN  
+DBMS_STATS.GATHER_TABLE_STATS( ownname => 'HR', tabname => 'EMPLOYEES', method_opt => 'FOR (SALARY) SIZE 254');  
+END;
+
+--One‑line: Fresh stats and histograms help the optimizer choose the right plan.
+
+---5. Optimize Joins & Subqueries
+
+---IN → EXISTS rewrite (prefer EXISTS for correlated checks):
+
+---IN version:
+
+SELECT e.*  FROM employees e  
+WHERE e.department_id IN (SELECT d.department_id FROM departments d WHERE d.location = 'NY');
+
+---EXISTS version:
+
+SELECT e.*  FROM employees e  
+WHERE EXISTS 
+(SELECT 1 FROM departments d WHERE d.department_id = e.department_id AND d.location = 'NY');
+
+---Push predicates down and join on indexed keys:
+SELECT e.emp_id, d.department_name 
+FROM employees e 
+JOIN departments d 
+ON e.department_id = d.department_id 
+WHERE d.location = 'NY'
+AND e.hire_date >= DATE '2022-01-01';
+
+---One‑line: Rewriting subqueries and pushing predicates reduces rows early, improving joins.
+
+--6. Partition Large Tables
+--Apply RANGE/LIST/HASH (or composite) partitioning to limit I/O to relevant partitions for large tables or time‑series data.
+--Create a range‑partitioned table by date:
+CREATE TABLE orders (    order_id NUMBER,    customer_id NUMBER,    order_date DATE,    total NUMBER  )
+PARTITION BY RANGE (order_date) (    PARTITION p2023 VALUES LESS THAN (DATE '2024-01-01'), 
+PARTITION p2024 VALUES LESS THAN (DATE '2025-01-01'),   
+PARTITION pmax VALUES LESS THAN (MAXVALUE)  );
+
+--Query benefiting from pruning:
+SELECT COUNT(*) FROM orders WHERE order_date BETWEEN DATE '2024-01-01' AND DATE '2024-03-31';
+
+---One‑line: Partitioning narrows I/O to relevant partitions and speeds maintenance.
+
+---7. Bulk Operations in PL/SQL
+
+---BULK COLLECT + FORALL example (batch update):
+
+DECLARE   
+TYPE t_empid IS TABLE OF employees.emp_id%TYPE; 
+l_empids t_empid; 
+BEGIN
+SELECT emp_id BULK COLLECT INTO l_empids FROM employees
+WHERE department_id = 10;   FORALL i IN 1..l_empids.COUNT
+UPDATE employees 
+SET salary = salary * 1.05 
+WHERE emp_id = l_empids(i);
+COMMIT; 
+END;
+
+---One‑line: BULK COLLECT and FORALL minimize context switches and speed batch DML.
+
+---8. Minimize Context Switching
+
+---Row‑by‑row (bad):
+BEGIN   
+FOR r IN (SELECT emp_id FROM employees WHERE department_id = 20) 
+LOOP
+UPDATE employees SET salary = salary * 1.02 WHERE emp_id = r.emp_id; 
+END LOOP;  
+COMMIT;
+END;
+
+---Set‑based (good):
+UPDATE employees SET salary = salary * 1.02 WHERE department_id = 20;
+
+---One‑line: Set‑based SQL replaces slow row‑by‑row loops and is almost always faster.
+
+---9. Monitor & Diagnose
+
+---Enable SQL Trace for session and create tkprof report (run in OS/SQL*Plus environment):
+--Enable:
+ALTER SESSION SET SQL_TRACE = TRUE;
+or using DBMS_MONITOR:
+EXEC DBMS_MONITOR.SESSION_TRACE_ENABLE(session_id => SYS_CONTEXT('USERENV','SID'));
+
+---After reproducing workload, find tracefile and run TKPROF:
+tkprof C:\oracle\diag\rdbms\...\<sid>_ora_12345.trc output.prf EXPLAIN=SYS/ SYS FORMAT=ALL
+--Generate AWR report (SQL*Plus):
+@?/rdbms/admin/awrrpt.sql
+
+---One‑line: Trace + TKPROF and AWR identify top consumers and wait events.
+
+---10. Apply Optimizer Hints (Carefully)
+
+---Example hint forcing index use:
+SELECT /*+ INDEX(e emp_empid_idx) */ e.emp_id, e.last_name 
+FROM employees e  
+WHERE e.emp_id = 101;
+---Use LEADING, USE_NL to influence join order/method:
+SELECT /*+ LEADING(e d) USE_NL(d) */ ...  FROM employees e JOIN departments d ON ...;
+
+--Prefer SQL Plan Baselines instead of permanent hints:
+-- Capture plan baseline (example) 
+DECLARE    c NUMBER; 
+BEGIN    c := DBMS_SPM.LOAD_PLANS_FROM_CURSOR_CACHE(       schema_name => 'HR',       sql_id => 'abcd1234');
+END;
+
+---One‑line: Hints can fix paths but should be last resort; prefer statistics and plan management.
+
+
+---One‑line structure to deliver:
+“I start by analyzing the execution plan, then check indexing and statistics. I use bind variables to reduce parsing,
+partition large tables where appropriate, and apply bulk operations in PL/SQL to minimize context switches. 
+For deeper analysis I use SQL Trace/TKPROF and AWR reports; optimizer hints are a last resort.”
+
+---Quick talking points: start → explain plan; next → indexing & stats; then → set/batch operations; finish → diagnostics & conservative hints.
