@@ -615,6 +615,38 @@ select  TABLE_NAME , PARTITIONING_TYPE  from
 • 	Interview Tip: Show how you used analytic functions for financial reporting (e.g., Actual vs Budget comparisons).
 
 
+---
+
+ Top 5 Oracle Conditional Logic Q&A
+1. DECODE vs CASE
+• 	DECODE: Oracle‑specific, limited to equality checks. Syntax: .
+• 	CASE: ANSI SQL standard, supports complex conditions (, , , predicates). Syntax:
+
+👉 Interview Tip: Say “CASE is more powerful and portable, DECODE is older and limited.”
+
+2. NVL vs COALESCE
+• 	NVL(expr1, expr2) → Returns  if  is NULL.
+• 	COALESCE(expr1, expr2, expr3, …) → Returns the first non‑NULL expression.
+• 	Key Difference:
+• 	 is Oracle‑specific, only 2 arguments.
+• 	 is ANSI standard, supports multiple arguments.
+👉 Example:
+
+
+3. NULL Handling in Oracle
+• 	NULL represents “unknown” or “missing” data.
+• 	Comparisons with NULL () always return FALSE.
+• 	Must use  or .
+👉 Example:
+
+
+4. CASE for Range Conditions
+
+👉 Shows CASE’s flexibility beyond equality checks.
+
+5. DECODE for Simple Mapping
+
+👉 Compact for simple equality mappings, but less flexible than CASE.
 
 
 ---Oracle query execution flow
