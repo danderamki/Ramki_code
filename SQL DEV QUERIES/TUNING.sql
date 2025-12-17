@@ -123,7 +123,8 @@ TYPE t_empid IS TABLE OF employees.emp_id%TYPE;
 l_empids t_empid; 
 BEGIN
 SELECT emp_id BULK COLLECT INTO l_empids FROM employees
-WHERE department_id = 10;   FORALL i IN 1..l_empids.COUNT
+WHERE department_id = 10;  
+FORALL i IN 1..l_empids.COUNT
 UPDATE employees 
 SET salary = salary * 1.05 
 WHERE emp_id = l_empids(i);
