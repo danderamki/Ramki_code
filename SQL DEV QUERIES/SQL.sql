@@ -723,3 +723,14 @@ In Oracle, a zero-length character string ('') is treated as a NULL. If you want
      
 
 In Oracle Database, the Recycle Bin is a logical container for objects that have been dropped but not yet permanently deleted. It allows you to recover dropped tables and their associated objects (like indexes and constraints) using Flashback Drop.
+SHOW RECYCLEBIN; (SQL*Plus)
+SELECT * FROM RECYCLEBIN; (Current User)
+SELECT * FROM DBA_RECYCLEBIN; (System-wide, requires privileges)
+Restore a Table:
+FLASHBACK TABLE table_name TO BEFORE DROP;
+FLASHBACK TABLE "BIN$..." TO BEFORE DROP RENAME TO new_name; (Use the system name if multiple versions exist)
+Permanent Deletion (Purge):
+DROP TABLE table_name PURGE; (Bypass the recycle bin entirely)
+PURGE TABLE table_name; (Remove a specific dropped table)
+PURGE RECYCLEBIN; (Empty your own recycle bin)
+PURGE DBA_RECYCLEBIN; (Empty the entire database recycle bin; requires SYSDBA) 
