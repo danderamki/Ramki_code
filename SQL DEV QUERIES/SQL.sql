@@ -734,3 +734,9 @@ DROP TABLE table_name PURGE; (Bypass the recycle bin entirely)
 PURGE TABLE table_name; (Remove a specific dropped table)
 PURGE RECYCLEBIN; (Empty your own recycle bin)
 PURGE DBA_RECYCLEBIN; (Empty the entire database recycle bin; requires SYSDBA) 
+
+
+
+
+     
+
