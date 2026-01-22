@@ -689,4 +689,37 @@ Logically, SQL clauses execute in the order FROM → WHERE → GROUP BY → HAVI
 | - Fetch/modify    |
 |   rows            |
 | - Return results  |
+
 +-------------------+
+
+--------NULL
+     
+In Oracle, a NULL represents the absence of data or an unknown value. Handling nulls correctly is critical because they do not behave like typical values in comparisons or arithmetic. 
+1. Essential Comparison Rules
+Testing for NULL: You cannot use standard operators like = or !=. Instead, use IS NULL or IS NOT NULL.
+Correct: WHERE commission IS NULL
+Incorrect: WHERE commission = NULL (this always returns zero rows).
+Arithmetic: Any arithmetic operation involving a NULL results in NULL (e.g., 10 + NULL = NULL).
+Concatenation: Unlike most other databases, Oracle treats NULL as an empty string during concatenation. 'Hello ' || NULL || 'World' results in 'Hello World'. 
+2. Built-in Null-Handling Functions 
+Oracle provides several functions to manage or substitute NULL values in your results: 
+NVL(expr1, replace_with): If expr1 is null, it returns the second argument.
+Example: NVL(salary, 0) returns 0 if salary is missing.
+NVL2(expr1, if_not_null, if_null): Returns different values based on whether the first expression is null or not.
+COALESCE(expr1, expr2, ..., exprN): Returns the first non-null value in a list. It is more flexible than NVL because it can take multiple arguments.
+NULLIF(expr1, expr2): Compares two values and returns NULL if they are equal; otherwise, it returns the first value.
+LNNVL(condition): Evaluates a condition and returns TRUE if the condition is FALSE or UNKNOWN (null). It is useful in WHERE clauses to handle null-prone columns without complex OR logic. 
+3. Sorting and Aggregation
+Sorting Order: By default, Oracle treats NULL values as the highest possible value.
+In ASC sorts, NULL values appear last.
+In DESC sorts, NULL values appear first.
+Use NULLS FIRST or NULLS LAST at the end of your ORDER BY clause to override this behavior.
+Aggregates: Functions like SUM(), AVG(), and COUNT(column) ignore NULL values. However, COUNT(*) counts all rows, including those with nulls. 
+4. Empty Strings vs. NULL
+In Oracle, a zero-length character string ('') is treated as a NULL. If you want to store a truly "empty" but non-null string, you must use a space (' ').
+
+=====DROP TABLE & RECYCLEBIN
+     
+     
+
+In Oracle Database, the Recycle Bin is a logical container for objects that have been dropped but not yet permanently deleted. It allows you to recover dropped tables and their associated objects (like indexes and constraints) using Flashback Drop.
